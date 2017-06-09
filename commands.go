@@ -18,13 +18,19 @@ import (
 func (c *Cli) CmdLogin() error {
 	uri := fmt.Sprintf("%s/rest/auth/1/session", c.endpoint)
 	for {
-		req, _ := http.NewRequest("GET", uri, nil)
 		user, _ := c.opts["user"].(string)
 
 		passwd := c.GetPass(user)
-		req.SetBasicAuth(user, passwd)
 
-		resp, err := c.makeRequest(req)
+		json, err := jsonEncode(map[string]interface{}{
+			"username": user,
+			"password": passwd,
+		})
+		if err != nil {
+			return err
+		}
+
+		resp, err := c.post(uri, json)
 		if err != nil {
 			return err
 		}
